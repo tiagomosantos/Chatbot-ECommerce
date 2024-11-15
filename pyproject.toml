@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "codeproject"
+version = "0.1.0"
+description = ""
+authors = ["tiagomosantos <tiago.moco.santos@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+openai = "^1.54.3"
+python-dotenv = "^1.0.1"
+pydantic = "^2.9.2"
+langchain = "^0.3.0"
+langchain-experimental = "^0.3.3"
+langchain-openai = "^0.2.6"
+jupyter = "^1.1.1"
+pandas = "^2.2.3"
+sqlalchemy = "^2.0.36"
+faiss-cpu = "^1.9.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
