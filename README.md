@@ -13,7 +13,7 @@ root/
 ├── README.md             # Comprehensive project documentation.
 ├── tests/                # Testing modules.
 │   ├── intentions.ipynb  # Tests for chatbot intentions.
-│   └── EXAMPLES.md       # Test examples documentation.
+│   └── README.md         # Test examples documentation.
 ├── company_name/         # Replace "company_name" with your company name.
 │   ├── chatbot/          # Chatbot modules and assets.
 │   │   ├── __init__.py   # Package marker.

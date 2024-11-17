@@ -1,5 +1,3 @@
-# TESTS.MD Template
-
 ## Purpose
 
 This document is intended for professor to test individual intention implementations. Each test ensures that specific intents behave as expected when given predefined inputs.
