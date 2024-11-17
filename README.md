@@ -12,7 +12,7 @@ root/
 ├── .gitignore            # Standard .gitignore file.
 ├── README.md             # Comprehensive project documentation.
 ├── tests/                # Testing modules.
-│   ├── intentions.py     # Tests for chatbot intentions.
+│   ├── intentions.ipynb  # Tests for chatbot intentions.
 │   └── EXAMPLES.md       # Test examples documentation.
 ├── company_name/         # Replace "company_name" with your company name.
 │   ├── chatbot/          # Chatbot modules and assets.
