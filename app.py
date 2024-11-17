@@ -1,4 +1,4 @@
-from bot.chatbot import CustomerServiceBot
+from cobuy.chatbot import CustomerServiceBot
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -19,7 +19,7 @@ while True:
     try:
         # You can specify different intentions here
         response = bot.process_user_input({"customer_input": user_input})
-        print(f"Bot: {response}")
+        print(f"Cobuy: {response}")
     except Exception as e:
         print(f"An error occurred: {str(e)}")
         print("Please try again with a different query.")

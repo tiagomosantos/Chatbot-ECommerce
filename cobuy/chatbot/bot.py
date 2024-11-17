@@ -1,9 +1,8 @@
 # Import necessary classes and modules
-from chains.product_info import ProductInfoReasoningChain, ProductInfoResponseChain
 from langchain_openai import ChatOpenAI
 from langchain_core.runnables.history import RunnableWithMessageHistory
-from bot.memory import MemoryManager
-
+from cobuy.chatbot.memory import MemoryManager
+from cobuy.chatbot.chains.product_info import ProductInfoReasoningChain, ProductInfoResponseChain
 
 class CustomerServiceBot:
     """A bot that handles customer service interactions by processing user inputs and

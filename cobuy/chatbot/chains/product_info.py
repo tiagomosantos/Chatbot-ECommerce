@@ -1,12 +1,12 @@
 # Import necessary libraries and modules
-from chains.base import generate_prompt_templates, PromptTemplate
 from langchain.schema.runnable.base import Runnable
 from langchain.output_parsers import PydanticOutputParser
 from pydantic import BaseModel, Field
 from langchain import callbacks
 from typing import List, Optional
-import pickle
 import json
+from cobuy.chatbot.chains.base import generate_prompt_templates, PromptTemplate
+from cobuy.data.loader import load_database_file
 
 # Define the product database as a dictionary with product categories
 PRODUCT_DATABASE = {
@@ -81,10 +81,7 @@ class ProductInfoReasoningChain(Runnable):
         self.product_database = PRODUCT_DATABASE
         self.categories, self.products = self._format_product_database()
         self.llm = llm
-
-        # Load the products catalog from a pickle file
-        with open("data/products_catalog.pkl", "rb") as handle:
-            self.products_catalog = pickle.load(handle)
+        self.products_catalog = load_database_file("products_catalog.pkl")
 
         # Define the prompt template for product identification
         prompt_template = PromptTemplate(
