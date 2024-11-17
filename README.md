@@ -8,15 +8,12 @@ Welcome to the E-commerce Chatbot project! This chatbot leverages the power of L
 root/
 ├── app.py                # Main Streamlit application script.
 ├── synthetic_data.ipynb  # Notebook for generating synthetic data.
+├── tests.ipynb      # Tests for chatbot intentions.
 ├── requirements.txt      # Python dependencies.
 ├── .gitignore            # Standard .gitignore file.
 ├── README.md             # Comprehensive project documentation.
-├── tests/                # Testing modules.
-│   ├── intentions.ipynb  # Tests for chatbot intentions.
-│   └── README.md         # Test examples documentation.
 ├── company_name/         # Replace "company_name" with your company name.
 │   ├── chatbot/          # Chatbot modules and assets.
-│   │   ├── __init__.py   # Package marker.
 │   │   ├── bot.py        # Core chatbot logic.
 │   │   ├── memory.py     # Chatbot memory.
 │   │   ├── chains/       # Custom LangChain chains.
