@@ -27,3 +27,14 @@ def load_database_file(filename: str):
         data = pickle.load(handle)
 
     return data
+
+
+def get_sqlite_database_path():
+    """
+    Get the path to SQLite database file.
+
+    Returns:
+        db_path: The path to the SQLite database file.
+    """
+    db_path = os.path.join(BASE_DIR, "database", "ecommerce.db")
+    return db_path

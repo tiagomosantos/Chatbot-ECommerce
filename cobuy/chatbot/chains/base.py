@@ -58,3 +58,26 @@ def generate_prompt_templates(
         )
 
     return prompt
+
+
+def generate_agent_prompt_template(
+    prompt_template: PromptTemplate,
+) -> ChatPromptTemplate:
+    """Generate a chat prompt template based on given templates and memory setting.
+
+    Args:
+        prompt_template: An instance of PromptTemplate containing system and human templates.
+
+    Returns:
+        A configured ChatPromptTemplate with specified message structure.
+    """
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            SystemMessagePromptTemplate.from_template(prompt_template.system_template),
+            MessagesPlaceholder(variable_name="chat_history"),
+            HumanMessagePromptTemplate.from_template(prompt_template.human_template),
+            MessagesPlaceholder(variable_name="agent_scratchpad"),
+        ]
+    )
+
+    return prompt

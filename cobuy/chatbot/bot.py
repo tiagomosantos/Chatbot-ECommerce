@@ -8,6 +8,7 @@ from cobuy.chatbot.chains.product_info import (
     ProductInfoReasoningChain,
     ProductInfoResponseChain,
 )
+from cobuy.chatbot.agents.order_agent import OrderAgent
 
 
 class CustomerServiceBot:
@@ -24,6 +25,8 @@ class CustomerServiceBot:
         """
         # Initialize the memory manager to manage session history
         self.memory = MemoryManager(user_id, conversation_id)
+        self.user_id = user_id
+        self.conversation_id = conversation_id
 
         # Configure the language model with specific parameters for response generation
         self.llm = ChatOpenAI(temperature=0.0, model="gpt-4o-mini")
@@ -32,34 +35,40 @@ class CustomerServiceBot:
         self.chain_map = {
             "product_information": {
                 "reasoning": ProductInfoReasoningChain(llm=self.llm),  # Reasoning chain
-                "response": self.add_memory_to_chain(
+                "response": self.add_memory_to_runnable(
                     ProductInfoResponseChain(llm=self.llm)  # Response chain with memory
                 ),
             }
         }
 
+        self.agent_map = {
+            "order": self.add_memory_to_runnable(
+                OrderAgent(llm=self.llm).agent_executor
+            )
+        }
+
         # Load the intention classifier to determine user intents
         self.intention_classifier = load_intention_classifier()
 
-    def add_memory_to_chain(self, original_chain):
-        """Wrap a chain with session history functionality.
+    def add_memory_to_runnable(self, original_runnable):
+        """Wrap a runnable with session history functionality.
 
         Args:
-            original_chain: The chain instance to which session history will be added.
+            original_runnable: The runnable instance to which session history will be added.
 
         Returns:
             An instance of RunnableWithMessageHistory that incorporates session history.
         """
         return RunnableWithMessageHistory(
-            original_chain,
+            original_runnable,
             self.memory.get_session_history,  # Retrieve session history
             input_messages_key="customer_input",  # Key for user inputs
             history_messages_key="chat_history",  # Key for chat history
             history_factory_config=self.memory.get_history_factory_config(),  # Config for history factory
         ).with_config(
             {
-                "run_name": original_chain.__class__.__name__
-            }  # Add chain name for tracking
+                "run_name": original_runnable.__class__.__name__
+            }  # Add runnable name for tracking
         )
 
     def get_chain(self, intent: str):
@@ -72,6 +81,17 @@ class CustomerServiceBot:
             A tuple containing the reasoning and response chain instances for the intent.
         """
         return self.chain_map[intent]["reasoning"], self.chain_map[intent]["response"]
+
+    def get_agent(self, intent: str):
+        """Retrieve the agent based on user intent.
+
+        Args:
+            intent: The identified intent of the user input.
+
+        Returns:
+            The agent instance for the intent.
+        """
+        return self.agent_map[intent]
 
     def get_user_intent(self, user_input: Dict):
         """Classify the user intent based on the input text.
@@ -128,6 +148,29 @@ class CustomerServiceBot:
 
         return response.content
 
+    def handle_order_intent(self, user_input: Dict):
+        """Handle the order intent by processing user input and providing a response.
+
+        Args:
+            user_input: The input text from the user.
+
+        Returns:
+            The content of the response after processing through the chains.
+        """
+        # Retrieve the agent for the order intent
+        agent = self.get_agent("order")
+
+        # Process user input through the agent
+        response = agent.invoke(
+            {
+                "customer_id": self.user_id,
+                "customer_input": user_input["customer_input"],
+            },
+            config=self.memory.get_memory_config(),
+        )
+
+        return response["output"]
+
     def process_user_input(self, user_input: Dict):
         """Process user input by routing through the appropriate intention pipeline.
 
@@ -140,10 +183,18 @@ class CustomerServiceBot:
         # Classify the user's intent based on their input
         intention = self.get_user_intent(user_input)
 
-        # Route the input based on the identified intention
-        if intention == "product_information":
-            response = self.handle_product_information(user_input)
-            return response
+        print(f"Intention: {intention}")
+
+        # Check if the intention is a string or None
+        if intention is None:
+            return "I'm sorry, I don't understand that intention."
         else:
-            # Default response for unrecognized intents
-            return "I'm sorry, I didn't understand that."
+            # Route the input based on the identified intention
+            if intention == "product_information":
+                response = self.handle_product_information(user_input)
+            elif intention == "create_order" or intention == "get_order":
+                # Default response for unrecognized intents
+                response = self.handle_order_intent(user_input)
+            else:
+                response = "Not implemented yet."
+            return response
