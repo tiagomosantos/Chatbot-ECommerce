@@ -72,6 +72,60 @@ class CustomerServiceBot:
         # Use a get method to retrieve the chains based on the intent
         return self.chain_map[intent]["reasoning"], self.chain_map[intent]["response"]
 
+    def handle_product_information(self, user_input: Dict):
+        """Handle the product information intent by processing user input and providing a response.
+
+        Args:
+            user_input: The input text from the user.
+
+        Returns:
+            The content of the response after processing through the chains.
+        """
+        # Step 1: Retrieve reasoning and response chains based on intent
+        reasoning_chain, response_chain = self.get_chain("product_information")
+
+        # Step 2: Process the input with the ReasoningChain
+        reasoning_output = reasoning_chain.invoke(user_input)
+
+        # Step 3: Use the output from ReasoningChain to get the response from ResponseChain
+        response = response_chain.invoke(
+            reasoning_output, config=self.memory.get_memory_config()
+        )
+
+        return response.content
+
+    def get_user_intent(self, user_input: Dict):
+        """Classify the user intent based on the input text.
+
+        Args:
+            user_input: The input text from the user.
+
+        Returns:
+            The classified intent of the user input.
+        """
+        intent_routes = self.intention_classifier.retrieve_multiple_routes(
+            user_input["customer_input"]
+        )
+
+        if len(intent_routes) == 0:
+            return None
+        else:
+            intention = intent_routes[0].name
+
+        # Check if the intention is None
+        if intention is None:
+            return None
+        else:
+            # Check if the intention is a string
+            if isinstance(intention, str):
+                return intention
+            else:
+                intention_type = type(intention).__name__
+                print(
+                    f"I'm sorry, I didn't understand that. The intention type is {intention_type}."
+                )
+                return None
+
     def process_user_input(self, user_input: Dict):
         """Process user input by routing through the appropriate reasoning and response chains.
 
@@ -81,32 +135,12 @@ class CustomerServiceBot:
         Returns:
             The content of the response after processing through the chains.
         """
-        # memory_config = self.memory.get_memory_config()
+        # Step 1: Classify the intent using the intention classifier
+        intention = self.get_user_intent(user_input)
 
-        # Step 1: Classify intent (using placeholder intent classification)
-        intent_route = self.intention_classifier(user_input["customer_input"])
-
-        intention = intent_route.name
-
-        print(f"Cobuy: {intention}")
-
-        """
-        if intention is None:
-            return "I'm sorry, I didn't understand that."
-        
-        elif intention == "product_information":
-
-            # Step 2: Retrieve reasoning and response chains based on intent
-            reasoning_chain, response_chain = self.get_chain(intention)
-
-            # Step 3: Process the input with the ReasoningChain
-            reasoning_output = reasoning_chain.invoke(user_input)
-
-            # Step 4: Use the output from ReasoningChain to get the response from ResponseChain
-            response = response_chain.invoke(reasoning_output, config=memory_config)
-
-            return response.content
-        
+        # Step 2: Process the input based on the identified intention
+        if intention == "product_information":
+            response = self.handle_product_information(user_input)
+            return response
         else:
-            return intention
-        """
+            return "I'm sorry, I didn't understand that."

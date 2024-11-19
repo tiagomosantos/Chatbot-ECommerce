@@ -12,8 +12,8 @@ def main(bot: DevCustomerServiceBot):
             break
 
         try:
-            # You can specify different intentions here
-            bot.process_user_input({"customer_input": user_input})
+            response = bot.process_user_input({"customer_input": user_input})
+            print(f"Cobuy: {response}")
         except Exception as e:
             print(f"Error: {str(e)}")
             print("Please try again with a different query.")
