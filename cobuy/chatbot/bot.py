@@ -193,8 +193,9 @@ class CustomerServiceBot:
             if intention == "product_information":
                 response = self.handle_product_information(user_input)
             elif intention == "create_order" or intention == "get_order":
-                # Default response for unrecognized intents
+
                 response = self.handle_order_intent(user_input)
             else:
+                # Default response for unrecognized intents
                 response = "Not implemented yet."
             return response

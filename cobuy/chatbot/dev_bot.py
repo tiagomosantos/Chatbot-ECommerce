@@ -103,9 +103,12 @@ class DevCustomerServiceBot(CustomerServiceBot):
                 # Process the input using the identified intention
                 if intention == "product_information":
                     response = self.handle_product_information(user_input)
-                    return response
+                elif intention == "create_order" or intention == "get_order":
+                    response = self.handle_order_intent(user_input)
                 else:
-                    return "Not implemented yet."
+                    # Default response for unrecognized intents
+                    response = "Not implemented yet."
+                return response
             else:
                 # Handle invalid validation input
                 if is_correct is None:
