@@ -1,4 +1,4 @@
-# Import necessary classes and modules
+# Import necessary classes and modules for chatbot functionality
 from typing import Dict
 from langchain_openai import ChatOpenAI
 from langchain_core.runnables.history import RunnableWithMessageHistory
@@ -22,22 +22,23 @@ class CustomerServiceBot:
             user_id: Identifier for the user.
             conversation_id: Identifier for the conversation.
         """
-        # Initialize session manager for handling session history and configuration
+        # Initialize the memory manager to manage session history
         self.memory = MemoryManager(user_id, conversation_id)
 
-        # Set up the language model with specified parameters
+        # Configure the language model with specific parameters for response generation
         self.llm = ChatOpenAI(temperature=0.0, model="gpt-4o-mini")
 
-        # Define chain map with reasoning and response chains for different intents
+        # Map intent names to their corresponding reasoning and response chains
         self.chain_map = {
             "product_information": {
-                "reasoning": ProductInfoReasoningChain(llm=self.llm),
+                "reasoning": ProductInfoReasoningChain(llm=self.llm),  # Reasoning chain
                 "response": self.add_memory_to_chain(
-                    ProductInfoResponseChain(llm=self.llm)
+                    ProductInfoResponseChain(llm=self.llm)  # Response chain with memory
                 ),
             }
         }
 
+        # Load the intention classifier to determine user intents
         self.intention_classifier = load_intention_classifier()
 
     def add_memory_to_chain(self, original_chain):
@@ -51,13 +52,15 @@ class CustomerServiceBot:
         """
         return RunnableWithMessageHistory(
             original_chain,
-            self.memory.get_session_history,
-            input_messages_key="customer_input",
-            history_messages_key="chat_history",
-            history_factory_config=self.memory.get_history_factory_config(),
+            self.memory.get_session_history,  # Retrieve session history
+            input_messages_key="customer_input",  # Key for user inputs
+            history_messages_key="chat_history",  # Key for chat history
+            history_factory_config=self.memory.get_history_factory_config(),  # Config for history factory
         ).with_config(
-            {"run_name": original_chain.__class__.__name__}
-        )  # Add a run name to the chain on LangSmith
+            {
+                "run_name": original_chain.__class__.__name__
+            }  # Add chain name for tracking
+        )
 
     def get_chain(self, intent: str):
         """Retrieve the reasoning and response chains based on user intent.
@@ -68,31 +71,7 @@ class CustomerServiceBot:
         Returns:
             A tuple containing the reasoning and response chain instances for the intent.
         """
-
-        # Use a get method to retrieve the chains based on the intent
         return self.chain_map[intent]["reasoning"], self.chain_map[intent]["response"]
-
-    def handle_product_information(self, user_input: Dict):
-        """Handle the product information intent by processing user input and providing a response.
-
-        Args:
-            user_input: The input text from the user.
-
-        Returns:
-            The content of the response after processing through the chains.
-        """
-        # Step 1: Retrieve reasoning and response chains based on intent
-        reasoning_chain, response_chain = self.get_chain("product_information")
-
-        # Step 2: Process the input with the ReasoningChain
-        reasoning_output = reasoning_chain.invoke(user_input)
-
-        # Step 3: Use the output from ReasoningChain to get the response from ResponseChain
-        response = response_chain.invoke(
-            reasoning_output, config=self.memory.get_memory_config()
-        )
-
-        return response.content
 
     def get_user_intent(self, user_input: Dict):
         """Classify the user intent based on the input text.
@@ -103,31 +82,32 @@ class CustomerServiceBot:
         Returns:
             The classified intent of the user input.
         """
+        # Retrieve possible routes for the user's input using the classifier
         intent_routes = self.intention_classifier.retrieve_multiple_routes(
             user_input["customer_input"]
         )
 
+        # Handle cases where no intent is identified
         if len(intent_routes) == 0:
             return None
         else:
-            intention = intent_routes[0].name
+            intention = intent_routes[0].name  # Use the first matched intent
 
-        # Check if the intention is None
+        # Validate the retrieved intention and handle unexpected types
         if intention is None:
             return None
+        elif isinstance(intention, str):
+            return intention
         else:
-            # Check if the intention is a string
-            if isinstance(intention, str):
-                return intention
-            else:
-                intention_type = type(intention).__name__
-                print(
-                    f"I'm sorry, I didn't understand that. The intention type is {intention_type}."
-                )
-                return None
+            # Log the intention type for unexpected cases
+            intention_type = type(intention).__name__
+            print(
+                f"I'm sorry, I didn't understand that. The intention type is {intention_type}."
+            )
+            return None
 
-    def process_user_input(self, user_input: Dict):
-        """Process user input by routing through the appropriate reasoning and response chains.
+    def handle_product_information(self, user_input: Dict):
+        """Handle the product information intent by processing user input and providing a response.
 
         Args:
             user_input: The input text from the user.
@@ -135,12 +115,35 @@ class CustomerServiceBot:
         Returns:
             The content of the response after processing through the chains.
         """
-        # Step 1: Classify the intent using the intention classifier
+        # Retrieve reasoning and response chains for the product information intent
+        reasoning_chain, response_chain = self.get_chain("product_information")
+
+        # Process user input through the reasoning chain
+        reasoning_output = reasoning_chain.invoke(user_input)
+
+        # Generate a response using the output of the reasoning chain
+        response = response_chain.invoke(
+            reasoning_output, config=self.memory.get_memory_config()
+        )
+
+        return response.content
+
+    def process_user_input(self, user_input: Dict):
+        """Process user input by routing through the appropriate intention pipeline.
+
+        Args:
+            user_input: The input text from the user.
+
+        Returns:
+            The content of the response after processing through the chains.
+        """
+        # Classify the user's intent based on their input
         intention = self.get_user_intent(user_input)
 
-        # Step 2: Process the input based on the identified intention
+        # Route the input based on the identified intention
         if intention == "product_information":
             response = self.handle_product_information(user_input)
             return response
         else:
+            # Default response for unrecognized intents
             return "I'm sorry, I didn't understand that."
