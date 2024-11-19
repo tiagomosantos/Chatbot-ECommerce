@@ -8,7 +8,6 @@ Welcome to the E-commerce Chatbot project! This chatbot leverages the power of L
 root/
 ├── app.py                # Main Streamlit application script.
 ├── dev.py                # Development script for testing chatbot.                   
-├── synthetic_data.ipynb  # Notebook for generating synthetic data.
 ├── requirements.txt      # Python dependencies.
 ├── .gitignore            # Standard .gitignore file.
 ├── README.md             # Comprehensive project documentation.
@@ -27,7 +26,7 @@ root/
 │   │   │   └── *.py      # Scripts for retrieval, embedding, ranking, QA pipelines, and utilities.
 │   │   ├── router/       # Intent router.
 │   │   │   └── *.py      # Intent router developement. 
-│   │   │   └── *.ipynb   # Intent routing training and evaluation.
+│   │   │   └── *.ipynb   # Intent routing training and evaluation. And to create synthetic data.
 │   ├── pages/            # Streamlit app pages.
 │   │   └── *.py          # Page modules.
 │   ├── data/             # Data and scripts.
