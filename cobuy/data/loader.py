@@ -4,6 +4,7 @@ import os
 # Base directory for data files.
 BASE_DIR = os.path.dirname(__file__)
 
+
 def load_database_file(filename: str):
     """
     Load data from a file in the `data` folder.
@@ -18,11 +19,11 @@ def load_database_file(filename: str):
         ValueError: If the file type is not supported.
     """
     file_path = os.path.join(BASE_DIR, "database", filename)
-    
+
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"File not found: {file_path}")
-    
+
     with open(file_path, "rb") as handle:
         data = pickle.load(handle)
-    
+
     return data

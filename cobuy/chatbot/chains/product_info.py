@@ -75,7 +75,7 @@ class ProductQueryResult(BaseModel):
 class ProductInfoReasoningChain(Runnable):
     """Chain that processes product information reasoning from a customer query."""
 
-    def __init__(self, llm):
+    def __init__(self, llm, memory=False):
         """Initialize the product info reasoning chain."""
         super().__init__()
         self.product_database = PRODUCT_DATABASE
@@ -102,7 +102,7 @@ class ProductInfoReasoningChain(Runnable):
             human_template="Customer Query: {customer_input}",
         )
 
-        self.prompt = generate_prompt_templates(prompt_template, memory=False)
+        self.prompt = generate_prompt_templates(prompt_template, memory=memory)
         self.output_parser = PydanticOutputParser(pydantic_object=ProductQueryResult)
         self.format_instructions = self.output_parser.get_format_instructions()
         self.chain = (self.prompt | self.llm | self.output_parser).with_config(
@@ -188,7 +188,7 @@ class ProductInfoReasoningChain(Runnable):
 class ProductInfoResponseChain(Runnable):
     """Chain that generates a response to customer queries about products."""
 
-    def __init__(self, llm):
+    def __init__(self, llm, memory=True):
         """Initialize the product information response chain."""
         super().__init__()
         self.llm = llm
@@ -212,7 +212,7 @@ class ProductInfoResponseChain(Runnable):
             """,
         )
 
-        self.prompt = generate_prompt_templates(prompt_template, memory=False)
+        self.prompt = generate_prompt_templates(prompt_template, memory=memory)
 
         # Chain to combine the prompt with LLM processing
         self.chain = self.prompt | self.llm

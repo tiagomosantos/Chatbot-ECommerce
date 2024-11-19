@@ -23,7 +23,9 @@ root/
 │   │   ├── agents/       # Custom agents.
 │   │   │   └── *.py      # Agent modules.
 │   │   ├── rag/          # RAG-related modules for retrieval-augmented generation.
-│   │   │   └── *.py       # Scripts for retrieval, embedding, ranking, QA pipelines, and utilities.
+│   │   │   └── *.py      # Scripts for retrieval, embedding, ranking, QA pipelines, and utilities.
+│   │   ├── router/       # Intent router.
+│   │   │   └── *.ipynb   # Intent routing training and evaluation.
 │   ├── pages/            # Streamlit app pages.
 │   │   └── *.py          # Page modules.
 │   ├── data/             # Data and scripts.

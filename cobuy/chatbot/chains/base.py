@@ -4,7 +4,7 @@ from langchain.prompts import (
     ChatPromptTemplate,
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
-    MessagesPlaceholder
+    MessagesPlaceholder,
 )
 
 
@@ -19,7 +19,9 @@ class PromptTemplate(BaseModel):
     )
 
 
-def generate_prompt_templates(prompt_template: PromptTemplate, memory: bool) -> ChatPromptTemplate:
+def generate_prompt_templates(
+    prompt_template: PromptTemplate, memory: bool
+) -> ChatPromptTemplate:
     """Generate a chat prompt template based on given templates and memory setting.
 
     Args:
@@ -31,16 +33,28 @@ def generate_prompt_templates(prompt_template: PromptTemplate, memory: bool) -> 
     """
     # Create prompt template including chat history if memory is enabled
     if memory:
-        prompt = ChatPromptTemplate.from_messages([
-            SystemMessagePromptTemplate.from_template(prompt_template.system_template),
-            MessagesPlaceholder(variable_name="chat_history"),
-            HumanMessagePromptTemplate.from_template(prompt_template.human_template),
-        ])
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                SystemMessagePromptTemplate.from_template(
+                    prompt_template.system_template
+                ),
+                MessagesPlaceholder(variable_name="chat_history"),
+                HumanMessagePromptTemplate.from_template(
+                    prompt_template.human_template
+                ),
+            ]
+        )
     else:
         # Create prompt template without chat history
-        prompt = ChatPromptTemplate.from_messages([
-            SystemMessagePromptTemplate.from_template(prompt_template.system_template),
-            HumanMessagePromptTemplate.from_template(prompt_template.human_template),
-        ])
-    
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                SystemMessagePromptTemplate.from_template(
+                    prompt_template.system_template
+                ),
+                HumanMessagePromptTemplate.from_template(
+                    prompt_template.human_template
+                ),
+            ]
+        )
+
     return prompt

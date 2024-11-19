@@ -1,8 +1,8 @@
-from cobuy import CustomerServiceBot
+from cobuy import DevCustomerServiceBot
 from dotenv import load_dotenv
 
 
-def main(bot: CustomerServiceBot):
+def main(bot: DevCustomerServiceBot):
 
     while True:
         user_input = input("You: ").strip()
@@ -23,12 +23,16 @@ if __name__ == "__main__":
     # Load environment variables from a .env file
     load_dotenv()
 
+    print("RUNNING IN DEV MODE.")
     print("Starting the bot...")
 
-    bot = CustomerServiceBot(user_id="user_123", conversation_id="conversation_123")
+    intentions = ["order_status", "create_order", "product_information"]
+    bot = DevCustomerServiceBot(
+        user_id="user_123", conversation_id="conversation_123", intentions=intentions
+    )
 
     print(
-        "Customer Service Bot initialized. Type 'exit' or 'quit' to end the conversation."
+        "Customer Service Bot initialized. Type 'exit' or 'quit' to end the developement process."
     )
 
     main(bot)

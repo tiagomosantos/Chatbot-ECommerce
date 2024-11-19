@@ -1,8 +1,14 @@
 # Import necessary classes and modules
+from typing import Dict
 from langchain_openai import ChatOpenAI
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from cobuy.chatbot.memory import MemoryManager
-from cobuy.chatbot.chains.product_info import ProductInfoReasoningChain, ProductInfoResponseChain
+from cobuy.chatbot.router.loader import load_intention_classifier
+from cobuy.chatbot.chains.product_info import (
+    ProductInfoReasoningChain,
+    ProductInfoResponseChain,
+)
+
 
 class CustomerServiceBot:
     """A bot that handles customer service interactions by processing user inputs and
@@ -31,6 +37,8 @@ class CustomerServiceBot:
                 ),
             }
         }
+
+        self.intention_classifier = load_intention_classifier()
 
     def add_memory_to_chain(self, original_chain):
         """Wrap a chain with session history functionality.
@@ -64,7 +72,7 @@ class CustomerServiceBot:
         # Use a get method to retrieve the chains based on the intent
         return self.chain_map[intent]["reasoning"], self.chain_map[intent]["response"]
 
-    def process_user_input(self, user_input: str):
+    def process_user_input(self, user_input: Dict):
         """Process user input by routing through the appropriate reasoning and response chains.
 
         Args:
@@ -73,18 +81,32 @@ class CustomerServiceBot:
         Returns:
             The content of the response after processing through the chains.
         """
+        # memory_config = self.memory.get_memory_config()
+
         # Step 1: Classify intent (using placeholder intent classification)
-        intent = "product_information"  # Static placeholder for intent classification
-        memory_config = self.memory.get_memory_config()
-        memory_config["configurable"]["intention"] = intent
+        intent_route = self.intention_classifier(user_input["customer_input"])
 
-        # Step 2: Retrieve reasoning and response chains based on intent
-        reasoning_chain, response_chain = self.get_chain(intent)
+        intention = intent_route.name
 
-        # Step 3: Process the input with the ReasoningChain
-        reasoning_output = reasoning_chain.invoke(user_input)
+        print(f"Cobuy: {intention}")
 
-        # Step 4: Use the output from ReasoningChain to get the response from ResponseChain
-        response = response_chain.invoke(reasoning_output, config=memory_config)
+        """
+        if intention is None:
+            return "I'm sorry, I didn't understand that."
+        
+        elif intention == "product_information":
 
-        return response.content
+            # Step 2: Retrieve reasoning and response chains based on intent
+            reasoning_chain, response_chain = self.get_chain(intention)
+
+            # Step 3: Process the input with the ReasoningChain
+            reasoning_output = reasoning_chain.invoke(user_input)
+
+            # Step 4: Use the output from ReasoningChain to get the response from ResponseChain
+            response = response_chain.invoke(reasoning_output, config=memory_config)
+
+            return response.content
+        
+        else:
+            return intention
+        """
