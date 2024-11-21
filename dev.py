@@ -1,5 +1,6 @@
-from cobuy import DevCustomerServiceBot  # Import the development version of the chatbot
 from dotenv import load_dotenv  # Import dotenv to load environment variables
+
+from cobuy import DevCustomerServiceBot  # Import the development version of the chatbot
 
 
 def main(bot: DevCustomerServiceBot):

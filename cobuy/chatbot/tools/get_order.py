@@ -1,8 +1,10 @@
-from typing import Type
-from pydantic import BaseModel
-from langchain.tools import BaseTool
 import sqlite3
+from typing import Type
+
+from langchain.tools import BaseTool
 from langchain_openai import ChatOpenAI
+from pydantic import BaseModel
+
 from cobuy.chatbot.chains.get_order import GetOrderReasoningChain
 from cobuy.data.loader import get_sqlite_database_path
 
@@ -54,5 +56,7 @@ class GetOrderTool(BaseTool):
 
         if customer_id != order["customer_id"]:
             return "You are not authorized to view this order."
+        else:
+            return order
         else:
             return order

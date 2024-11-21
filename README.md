@@ -12,6 +12,7 @@ root/
 ├── .gitignore            # Standard .gitignore file.
 ├── README.md             # Comprehensive project documentation.
 ├── company_name/         # Replace "company_name" with your company name.
+│   ├──  __init__.py      # Package initialization, expose bot and dev_bot.
 │   ├── chatbot/          # Chatbot modules and assets.
 │   │   ├── bot.py        # Core chatbot logic.
 │   │   ├── dev_bot.py    # Development chatbot for testing.

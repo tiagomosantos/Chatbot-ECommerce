@@ -1,7 +1,8 @@
 # Import necessary classes and modules for chatbot functionality
-from typing import Dict
-from cobuy.chatbot.router.auxiliar import add_message
+from typing import Dict, List
+
 from cobuy.chatbot.bot import CustomerServiceBot
+from cobuy.chatbot.router.auxiliar import add_message
 
 
 class DevCustomerServiceBot(CustomerServiceBot):
@@ -9,7 +10,7 @@ class DevCustomerServiceBot(CustomerServiceBot):
     interaction with developers for testing and updating intents.
     """
 
-    def __init__(self, user_id: str, conversation_id: str, intentions: list):
+    def __init__(self, user_id: str, conversation_id: str, intentions: List[str]):
         """Initialize the development bot with additional functionality.
 
         Args:
@@ -64,7 +65,7 @@ class DevCustomerServiceBot(CustomerServiceBot):
         else:
             return None  # Invalid input received
 
-    def create_new_user_messages(self, user_input: Dict):
+    def create_new_user_messages(self, user_input: Dict[str, str]):
         """Allow the user to create a new intention and save it to the intention list.
 
         Args:
@@ -79,7 +80,7 @@ class DevCustomerServiceBot(CustomerServiceBot):
         # Save the new intention and message to a JSON file
         add_message(new_item, "new_intentions.json")
 
-    def process_user_input(self, user_input: Dict):
+    def process_user_input(self, user_input: Dict[str, str]) -> str:
         """Process user input by routing through the intention pipeline or allowing for updates.
 
         Args:
@@ -112,7 +113,7 @@ class DevCustomerServiceBot(CustomerServiceBot):
             else:
                 # Handle invalid validation input
                 if is_correct is None:
-                    print("You should enter 'Y' or 'N'. Please try again.")
+                    return "You should enter 'Y' or 'N'. Please try again."
                 else:
                     # Create a new intention and notify the user
                     self.create_new_user_messages(user_input)

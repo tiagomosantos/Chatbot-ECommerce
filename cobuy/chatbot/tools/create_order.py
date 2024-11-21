@@ -1,8 +1,10 @@
-from typing import Type
-from pydantic import BaseModel
-from langchain.tools import BaseTool
 import sqlite3
+from typing import Type
+
+from langchain.tools import BaseTool
 from langchain_openai import ChatOpenAI
+from pydantic import BaseModel
+
 from cobuy.chatbot.chains.create_order import CreateOrderReasoningChain
 from cobuy.data.loader import get_sqlite_database_path
 
@@ -56,5 +58,7 @@ class CreateOrderTool(BaseTool):
         finally:
             cursor.close()
             connection.close()
+
+        return f"Order created with ID: {id}"
 
         return f"Order created with ID: {id}"

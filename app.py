@@ -1,5 +1,6 @@
-from cobuy import CustomerServiceBot  # Import the chatbot class
 from dotenv import load_dotenv  # Import dotenv to load environment variables
+
+from cobuy import CustomerServiceBot  # Import the chatbot class
 
 
 def main(bot: CustomerServiceBot):

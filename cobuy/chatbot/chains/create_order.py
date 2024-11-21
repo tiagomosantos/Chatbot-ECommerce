@@ -1,11 +1,12 @@
-from langchain.schema.runnable.base import Runnable
-from langchain.output_parsers import PydanticOutputParser
-from pydantic import BaseModel
-from pydantic import BaseModel
-from langchain_community.utilities.sql_database import SQLDatabase
 import ast
 import re
-from cobuy.chatbot.chains.base import generate_prompt_templates, PromptTemplate
+
+from langchain.output_parsers import PydanticOutputParser
+from langchain.schema.runnable.base import Runnable
+from langchain_community.utilities.sql_database import SQLDatabase
+from pydantic import BaseModel
+
+from cobuy.chatbot.chains.base import PromptTemplate, generate_prompt_templates
 
 
 class OrderInformation(BaseModel):
@@ -57,4 +58,5 @@ class CreateOrderReasoningChain(Runnable):
                 "products_list": self.products_list,
                 "format_instructions": self.format_instructions,
             },
+        )
         )

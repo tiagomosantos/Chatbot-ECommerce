@@ -1,14 +1,18 @@
 # Import necessary classes and modules for chatbot functionality
-from typing import Dict
-from langchain_openai import ChatOpenAI
+from typing import Any, Dict, Optional, Tuple
+
+from langchain.schema.runnable.base import Runnable
+from langchain_core.messages.ai import AIMessage
 from langchain_core.runnables.history import RunnableWithMessageHistory
-from cobuy.chatbot.memory import MemoryManager
-from cobuy.chatbot.router.loader import load_intention_classifier
+from langchain_openai import ChatOpenAI
+
+from cobuy.chatbot.agents.order_agent import OrderAgent
 from cobuy.chatbot.chains.product_info import (
     ProductInfoReasoningChain,
     ProductInfoResponseChain,
 )
-from cobuy.chatbot.agents.order_agent import OrderAgent
+from cobuy.chatbot.memory import MemoryManager
+from cobuy.chatbot.router.loader import load_intention_classifier
 
 
 class CustomerServiceBot:
@@ -24,10 +28,15 @@ class CustomerServiceBot:
             conversation_id: Identifier for the conversation.
         """
         # Initialize the memory manager to manage session history
-        self.memory = MemoryManager(user_id, conversation_id)
+        self.memory = MemoryManager()
         self.user_id = user_id
         self.conversation_id = conversation_id
-
+        self.memory_config = {
+            "configurable": {
+                "user_id": self.user_id,
+                "conversation_id": self.conversation_id,
+            }
+        }
         # Configure the language model with specific parameters for response generation
         self.llm = ChatOpenAI(temperature=0.0, model="gpt-4o-mini")
 
@@ -50,7 +59,9 @@ class CustomerServiceBot:
         # Load the intention classifier to determine user intents
         self.intention_classifier = load_intention_classifier()
 
-    def add_memory_to_runnable(self, original_runnable):
+    def add_memory_to_runnable(
+        self, original_runnable: Runnable
+    ) -> RunnableWithMessageHistory:
         """Wrap a runnable with session history functionality.
 
         Args:
@@ -71,7 +82,7 @@ class CustomerServiceBot:
             }  # Add runnable name for tracking
         )
 
-    def get_chain(self, intent: str):
+    def get_chain(self, intent: str) -> Tuple[Optional[Runnable], Optional[Runnable]]:
         """Retrieve the reasoning and response chains based on user intent.
 
         Args:
@@ -80,7 +91,14 @@ class CustomerServiceBot:
         Returns:
             A tuple containing the reasoning and response chain instances for the intent.
         """
-        return self.chain_map[intent]["reasoning"], self.chain_map[intent]["response"]
+        reasoning_chain: Optional[Runnable] = self.chain_map[intent].get(
+            "reasoning", None
+        )
+        response_chain: Optional[Runnable] = self.chain_map[intent].get(
+            "response", None
+        )
+
+        return reasoning_chain, response_chain
 
     def get_agent(self, intent: str):
         """Retrieve the agent based on user intent.
@@ -93,7 +111,7 @@ class CustomerServiceBot:
         """
         return self.agent_map[intent]
 
-    def get_user_intent(self, user_input: Dict):
+    def get_user_intent(self, user_input: Dict[str, str]):
         """Classify the user intent based on the input text.
 
         Args:
@@ -115,18 +133,11 @@ class CustomerServiceBot:
 
         # Validate the retrieved intention and handle unexpected types
         if intention is None:
-            return None
-        elif isinstance(intention, str):
-            return intention
+            return "None"
         else:
-            # Log the intention type for unexpected cases
-            intention_type = type(intention).__name__
-            print(
-                f"I'm sorry, I didn't understand that. The intention type is {intention_type}."
-            )
-            return None
+            return intention
 
-    def handle_product_information(self, user_input: Dict):
+    def handle_product_information(self, user_input: Dict[str, str]) -> str:
         """Handle the product information intent by processing user input and providing a response.
 
         Args:
@@ -139,16 +150,16 @@ class CustomerServiceBot:
         reasoning_chain, response_chain = self.get_chain("product_information")
 
         # Process user input through the reasoning chain
-        reasoning_output = reasoning_chain.invoke(user_input)
+        reasoning_output: AIMessage = reasoning_chain.invoke(user_input)
 
         # Generate a response using the output of the reasoning chain
-        response = response_chain.invoke(
-            reasoning_output, config=self.memory.get_memory_config()
+        response: AIMessage = response_chain.invoke(
+            reasoning_output, config=self.memory_config
         )
 
         return response.content
 
-    def handle_order_intent(self, user_input: Dict):
+    def handle_order_intent(self, user_input: Dict[str, str]) -> str:
         """Handle the order intent by processing user input and providing a response.
 
         Args:
@@ -161,17 +172,17 @@ class CustomerServiceBot:
         agent = self.get_agent("order")
 
         # Process user input through the agent
-        response = agent.invoke(
+        response: Dict[str, str] = agent.invoke(
             {
                 "customer_id": self.user_id,
                 "customer_input": user_input["customer_input"],
             },
-            config=self.memory.get_memory_config(),
+            config=self.memory_config,
         )
 
         return response["output"]
 
-    def process_user_input(self, user_input: Dict):
+    def process_user_input(self, user_input: Dict[str, str]) -> str:
         """Process user input by routing through the appropriate intention pipeline.
 
         Args:
@@ -193,7 +204,6 @@ class CustomerServiceBot:
             if intention == "product_information":
                 response = self.handle_product_information(user_input)
             elif intention == "create_order" or intention == "get_order":
-
                 response = self.handle_order_intent(user_input)
             else:
                 # Default response for unrecognized intents

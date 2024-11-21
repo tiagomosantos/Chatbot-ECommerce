@@ -1,5 +1,5 @@
-import pickle
 import os
+import pickle
 
 # Base directory for data files.
 BASE_DIR = os.path.dirname(__file__)

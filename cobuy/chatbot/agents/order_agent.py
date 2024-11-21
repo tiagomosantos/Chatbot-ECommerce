@@ -1,18 +1,21 @@
-from langchain.agents import AgentExecutor
-from langchain.agents import create_tool_calling_agent
+from typing import list
+
+from langchain.agents import AgentExecutor, create_tool_calling_agent
+from langchain_openai import ChatOpenAI
+
+from cobuy.chatbot.chains.base import PromptTemplate, generate_agent_prompt_template
 from cobuy.chatbot.tools.create_order import CreateOrderTool
 from cobuy.chatbot.tools.get_order import GetOrderTool
-from cobuy.chatbot.chains.base import generate_agent_prompt_template, PromptTemplate
 
 
 class OrderAgent:
-    def __init__(self, llm):
+    def __init__(self, llm: ChatOpenAI):
         self.llm = llm
         self._agent_executor = None  # Placeholder for lazy initialization
 
         create_order_tool = CreateOrderTool()
         check_order_tool = GetOrderTool()
-        self.tools = [create_order_tool, check_order_tool]
+        self.tools: list = [create_order_tool, check_order_tool]
 
         # Define the prompt template for product identification
         prompt_template = PromptTemplate(
