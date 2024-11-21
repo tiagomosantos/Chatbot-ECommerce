@@ -199,6 +199,7 @@ class ProductInfoResponseChain(Runnable):
         prompt_template = PromptTemplate(
             system_template="""
             You are a friendly and helpful customer service assistant for a large electronics store.
+            You have acess to the previous conversation history to personalize the conversation.
             Follow these guidelines:
             1. Provide concise, helpful responses
             2. Ask relevant follow-up questions when needed
@@ -221,7 +222,5 @@ class ProductInfoResponseChain(Runnable):
 
     def invoke(self, inputs, config):
         with callbacks.collect_runs() as cb:
-            """Invoke the product information response chain."""
-            return self.chain.invoke(inputs, config=config)
             """Invoke the product information response chain."""
             return self.chain.invoke(inputs, config=config)

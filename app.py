@@ -9,6 +9,9 @@ def main(bot: CustomerServiceBot):
     Args:
         bot: An instance of the CustomerServiceBot.
     """
+    # Print a greetings
+    print("Cobuy: Hi there! Welcome to Cobuy! How can I assist you today?")
+
     while True:
         # Prompt the user for input
         user_input = input("You: ").strip()
@@ -16,6 +19,7 @@ def main(bot: CustomerServiceBot):
         # Allow the user to exit the conversation
         if user_input.lower() in ["exit", "quit"]:
             print("Goodbye!")
+            bot.save_memory()
             break
 
         try:

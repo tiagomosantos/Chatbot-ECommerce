@@ -1,8 +1,11 @@
 # Import necessary modules and classes
+import json
 from typing import Dict, List, Tuple
 
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.messages import BaseMessage
+from langchain_core.messages.ai import AIMessage
+from langchain_core.messages.human import HumanMessage
 from langchain_core.runnables import ConfigurableFieldSpec
 from pydantic import BaseModel, Field
 
@@ -78,3 +81,25 @@ class MemoryManager:
             A list of ConfigurableFieldSpec instances for field configurations.
         """
         return self.history_factory_config
+
+    def save_session_history(self, user_id: str, conversation_id: str) -> None:
+        """Save the session history as a txt file.
+
+        Args:
+            user_id: Identifier for the user.
+            conversation_id: Identifier for the conversation.
+        """
+
+        session_history = self.get_session_history(
+            user_id=user_id, conversation_id=conversation_id
+        )
+
+        # Iterate over messages in the session history
+        # and save them to a text file
+        with open(f"{user_id}_{conversation_id}_history.txt", "w") as file:
+            for message in session_history.messages:
+                # Check if is HumanMessage or AIMessage
+                if isinstance(message, HumanMessage):
+                    file.write(f"User: {message.content}\n")
+                elif isinstance(message, AIMessage):
+                    file.write(f"Bot: {message.content}\n")

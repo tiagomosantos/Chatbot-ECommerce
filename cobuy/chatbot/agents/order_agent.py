@@ -1,4 +1,4 @@
-from typing import list
+from typing import List
 
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_openai import ChatOpenAI
@@ -15,12 +15,14 @@ class OrderAgent:
 
         create_order_tool = CreateOrderTool()
         check_order_tool = GetOrderTool()
-        self.tools: list = [create_order_tool, check_order_tool]
+        self.tools: List = [create_order_tool, check_order_tool]
 
         # Define the prompt template for product identification
         prompt_template = PromptTemplate(
             system_template="""
-            You are now connected to the e-commerce database. You can use the following tools to interact with the database:
+            You are now connected to the e-commerce database. 
+            You have acess to the previous conversation history to personalize the conversation.
+            You can use the following tools to interact with the database:
 
             1. Create Order: Create a new order in the database
             2. Get Order: Retrieve details of an existing order based on the order ID

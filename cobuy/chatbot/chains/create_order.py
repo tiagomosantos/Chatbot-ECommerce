@@ -59,4 +59,3 @@ class CreateOrderReasoningChain(Runnable):
                 "format_instructions": self.format_instructions,
             },
         )
-        )

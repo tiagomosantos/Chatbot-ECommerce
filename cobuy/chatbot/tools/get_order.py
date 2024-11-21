@@ -58,5 +58,3 @@ class GetOrderTool(BaseTool):
             return "You are not authorized to view this order."
         else:
             return order
-        else:
-            return order
